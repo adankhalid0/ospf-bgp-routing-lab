@@ -1,0 +1,39 @@
+name: Lab test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate compose file
+        run: docker compose config -q
+
+      - name: Start the lab
+        run: docker compose up -d
+
+      - name: Verify OSPF, BGP and connectivity
+        run: bash scripts/verify.sh
+
+      - name: Failover test
+        run: bash scripts/failover.sh
+
+      - name: Router state and logs
+        if: always()
+        run: |
+          docker compose ps
+          for r in r1 r2 r3 r4; do
+            echo "===== $r ====="
+            docker compose logs --no-color --tail 40 "$r" || true
+          done
+
+      - name: Tear down
+        if: always()
+        run: docker compose down -v
