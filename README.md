@@ -51,7 +51,7 @@ graph LR
 
 ## Requirements
 
-- Docker with Docker Compose v2 (Docker Desktop on Windows or macOS, or Docker Engine on Linux)
+- Docker Engine with Docker Compose v2 on Linux (the GitHub Actions test runs on Ubuntu)
 - Git Bash, WSL or any Linux/macOS shell for the scripts
 
 ## Quick start
@@ -90,9 +90,9 @@ docker compose exec host-a traceroute -n 10.10.200.10
 
 - **Real routers, not a simulator.** FRRouting is the routing suite used in many Linux-based network operating systems, so the commands and output are close to what you see on real equipment.
 - **One Docker network per link.** Each link is a separate subnet, so every router has real interfaces and its own routing table.
-- **Unicast OSPF neighbors.** Docker's virtual networks do not forward multicast between containers (OSPF normally uses 224.0.0.5), so every OSPF interface is set to `point-to-multipoint non-broadcast` with the neighbors configured statically. The routers still form real OSPF adjacencies and exchange LSAs, only the hello packets are sent unicast.
+- **Unicast OSPF neighbors.** Docker's virtual networks do not forward multicast between containers (OSPF normally uses 224.0.0.5), so every OSPF interface is set to `non-broadcast` (NBMA) mode with the neighbors configured statically. The routers still form real OSPF adjacencies and exchange LSAs, only the hello packets are sent unicast.
 - **Interfaces are found by IP address.** Docker does not guarantee the order of `eth0`, `eth1`, ... so `scripts/frr-entrypoint.sh` fills in the real interface names from the IP addresses when each router starts.
-- **`network` statements instead of per-interface OSPF.** Docker does not guarantee interface names across restarts, so OSPF is enabled by subnet and not by `ethX`.
+- **OSPF is enabled by subnet.** `network` statements pick the interfaces, so the config does not depend on interface names. The only per-interface setting is the OSPF network type, which is written with the IP address of the interface and resolved to the real name by the entrypoint script.
 - **Isolated by default.** All networks are `internal: true`, so the lab has no NAT and no route to the internet.
 - **Local preference for path selection.** It is applied on r1's inbound policy from r4, which is the usual place to express a primary/backup exit.
 - **`no bgp ebgp-requires-policy`.** Newer FRR versions refuse to exchange eBGP routes without a route policy. It is disabled on the eBGP routers to keep the lab small; a production setup would use explicit prefix filters.
@@ -100,6 +100,7 @@ docker compose exec host-a traceroute -n 10.10.200.10
 ## Limits
 
 - This is a lab: no MPLS, no BFD, no authentication on OSPF or BGP, and no IPv6.
+- Tested in GitHub Actions on Ubuntu with Docker Engine. In my test on Docker Desktop for Windows (WSL2), OSPF and BGP sessions on directly connected links came up, but packets addressed to anything other than the link address of the next router were dropped between the containers, so traffic could not be forwarded through the routers. Run the lab on Linux.
 - Convergence times in containers are not representative of real hardware.
 
 ## Possible next steps
