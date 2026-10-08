@@ -87,29 +87,22 @@ services:
 networks:
   link-r1-r2:
     internal: true
-    internal: true
     ipam: { config: [ { subnet: 10.10.12.0/24 } ] }
   link-r1-r3:
-    internal: true
     internal: true
     ipam: { config: [ { subnet: 10.10.13.0/24 } ] }
   link-r1-r4:
     internal: true
-    internal: true
     ipam: { config: [ { subnet: 10.10.14.0/24 } ] }
   link-r2-r3:
-    internal: true
     internal: true
     ipam: { config: [ { subnet: 10.10.23.0/24 } ] }
   link-r3-r4:
     internal: true
-    internal: true
     ipam: { config: [ { subnet: 10.10.34.0/24 } ] }
   lan-a:
     internal: true
-    internal: true
     ipam: { config: [ { subnet: 10.10.100.0/24 } ] }
   lan-b:
-    internal: true
     internal: true
     ipam: { config: [ { subnet: 10.10.200.0/24 } ] }
