@@ -88,6 +88,26 @@ docker compose exec host-a ping -c 3 10.10.200.10
 docker compose exec host-a traceroute -n 10.10.200.10
 ```
 
+## Results
+
+The lab is tested on every push with GitHub Actions (Ubuntu runner). The screenshots below are from a passing run.
+
+**1. Verification script: 11 of 11 checks pass.** OSPF adjacencies, all BGP sessions, the BGP routes and host-a reaching host-b via r1.
+
+![Verify step: 11 passed, 0 failed](docs/images/01-verify.png)
+
+**2. Routing state.** Every OSPF neighbor is in state `Full`, and all iBGP and eBGP sessions are established.
+
+![OSPF neighbors and BGP summaries for r1, r2, r3 and r4](docs/images/02-routing-state-ospf-bgp.png)
+
+On r2 the route to 10.10.200.0/24 is learned from r1 with local preference 200, which is how r1 is chosen as the primary exit. r4 has two paths to 10.10.100.0/24, one through each of r1 and r3.
+
+![BGP route with localpref 200 on r2, and the BGP table on r4](docs/images/03-routing-state-routes.png)
+
+**3. Failover test.** r1 is stopped. Traffic from host-a to host-b moves to the path via r3. When r1 starts again, the path returns to r1 because of its higher local preference.
+
+![Failover test: path via r1, then via r3, then back via r1](docs/images/04-failover.png)
+
 ## Design decisions
 
 - **Real routers, not a simulator.** FRRouting is the routing suite used in many Linux-based network operating systems, so the commands and output are close to what you see on real equipment.
