@@ -22,6 +22,22 @@ jobs:
       - name: Verify OSPF, BGP and connectivity
         run: bash scripts/verify.sh
 
+      - name: Show routing state
+        if: always()
+        run: |
+          for r in r1 r2 r3; do
+            echo "===== $r: OSPF neighbors ====="
+            docker compose exec -T "$r" vtysh -c 'show ip ospf neighbor' || true
+          done
+          for r in r1 r2 r3 r4; do
+            echo "===== $r: BGP summary ====="
+            docker compose exec -T "$r" vtysh -c 'show ip bgp summary' || true
+          done
+          echo "===== r2: BGP route to 10.10.200.0/24 (local-pref 200 via r1) ====="
+          docker compose exec -T r2 vtysh -c 'show ip bgp 10.10.200.0/24' || true
+          echo "===== r4: BGP table ====="
+          docker compose exec -T r4 vtysh -c 'show ip bgp' || true
+
       - name: Failover test
         run: bash scripts/failover.sh
 

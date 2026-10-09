@@ -1,5 +1,7 @@
 # OSPF + BGP Routing Lab
 
+[![CI](https://github.com/adankhalid0/ospf-bgp-routing-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/adankhalid0/ospf-bgp-routing-lab/actions/workflows/ci.yml)
+
 A small routing lab built with [FRRouting](https://frrouting.org/) and Docker
 Compose. Four routers form a simulated service-provider setup: an internal
 network running **OSPF**, connected to an external network over **eBGP**, with
